@@ -1,3 +1,5 @@
+{{ form_start(form, {'attr': {'id': 'recipe-form'}}) }}
+
 <div class="mb-3">
     {{ form_label(form.title, 'Titre', {'label_attr': {'class': 'form-label'}}) }}
     {{ form_widget(form.title, {'attr': {'class': 'form-control'}}) }}
@@ -18,15 +20,16 @@
     {{ form_errors(form.difficulty) }}
 </div>
 <div class="mb-3">
-    {{ form_label(form.cooking_time, 'Temps de cuisson', {'label_attr': {'class': 'form-label'}}) }}
-    {{ form_widget(form.cooking_time, {'attr': {'class': 'form-control'}}) }}
-    {{ form_errors(form.cooking_time) }}
-</div>
-<div class="mb-3">
-    {{ form_label(form.rest_time, 'Temps de repos', {'label_attr': {'class': 'form-label'}}) }}
-    {{ form_widget(form.rest_time, {'attr': {'class': 'form-control'}}) }}
-    {{ form_errors(form.rest_time) }}
-</div>
+        {{ form_label(form.cooking_time, 'Temps de cuisson (en minutes)', {'label_attr': {'class': 'form-label'}}) }}
+        {{ form_widget(form.cooking_time, {'attr': {'class': 'form-control'}}) }}
+        {{ form_errors(form.cooking_time) }}
+    </div>
+
+    <div class="mb-3">
+        {{ form_label(form.rest_time, 'Temps de repos (en minutes)', {'label_attr': {'class': 'form-label'}}) }}
+        {{ form_widget(form.rest_time, {'attr': {'class': 'form-control'}}) }}
+        {{ form_errors(form.rest_time) }}
+    </div>
 <div class="mb-3">
     <h2>Ingrédients</h2>
     <ul id="ingredient-list" class="list-group" data-prototype="{{ form_widget(form.ingredients.vars.prototype)|e('html_attr') }}">
@@ -52,3 +55,4 @@
     <button type="button" id="add-etapeRecette" class="btn btn-secondary mt-3">Ajouter une étape</button>
 </div>
 <button type="submit" class="btn btn-primary">Enregistrer</button>
+{{ form_end(form) }}

@@ -9,7 +9,6 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Vich\UploaderBundle\Form\Type\VichImageType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\TimeType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
@@ -37,10 +36,10 @@ class RecipeType extends AbstractType
             ->add('difficulty', IntegerType::class, [
                 'label' => 'Difficulté',
             ])
-            ->add('cooking_time', TimeType::class, [
+            ->add('cooking_time', IntegerType::class, [
                 'label' => 'Temps de cuisson',
             ])
-            ->add('rest_time', TimeType::class, [
+            ->add('rest_time', IntegerType::class, [
                 'label' => 'Temps de repos',
                 'required' => false,
             ])

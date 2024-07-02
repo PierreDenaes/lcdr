@@ -40,13 +40,13 @@ class Recipe
     #[Groups(['recipe'])]
     private ?int $difficulty = null;
 
-    #[ORM\Column(type: 'time')]
+    #[ORM\Column(type: 'integer')]
     #[Groups(['recipe'])]
-    private ?\DateTimeInterface $cooking_time = null;
+    private ?int $cooking_time = null;
 
-    #[ORM\Column(type: 'time', nullable: true)]
+    #[ORM\Column(type: 'integer', nullable: true)]
     #[Groups(['recipe'])]
-    private ?\DateTimeInterface $rest_time = null;
+    private ?int $rest_time = null;
 
     #[ORM\ManyToOne(targetEntity: Profile::class, inversedBy: 'recipes')]
     #[ORM\JoinColumn(nullable: false)]
@@ -143,24 +143,24 @@ class Recipe
         return $this;
     }
 
-    public function getCookingTime(): ?\DateTimeInterface
+    public function getCookingTime(): ?int
     {
         return $this->cooking_time;
     }
 
-    public function setCookingTime(\DateTimeInterface $cooking_time): self
+    public function setCookingTime(int $cooking_time): self
     {
         $this->cooking_time = $cooking_time;
 
         return $this;
     }
 
-    public function getRestTime(): ?\DateTimeInterface
+    public function getRestTime(): ?int
     {
         return $this->rest_time;
     }
 
-    public function setRestTime(?\DateTimeInterface $rest_time): self
+    public function setRestTime(?int $rest_time): self
     {
         $this->rest_time = $rest_time;
 

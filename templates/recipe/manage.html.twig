@@ -34,12 +34,7 @@
                     </div>
                     <div class="tab-pane fade" id="new-recipe">
                         <form id="recipe-form-new" method="post" action="{{ path('recipe_new') }}" enctype="multipart/form-data" class="needs-validation" novalidate>
-                            {{ include('recipe/recipe_form.html.twig', { form: form_new }) }}
-                        </form>
-                    </div>
-                    <div class="tab-pane fade" id="edit-recipe">
-                        <form id="recipe-form-edit" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
-                            {{ include('recipe/recipe_form.html.twig', { form: form_edit }) }}
+                            {{ include('recipe/recipe_form.html.twig') }}
                         </form>
                     </div>
                 </div>

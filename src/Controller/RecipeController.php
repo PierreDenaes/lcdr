@@ -14,7 +14,6 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Psr\Log\LoggerInterface;
 
 #[Route('/profile/recipes')]
 class RecipeController extends AbstractController
@@ -23,15 +22,13 @@ class RecipeController extends AbstractController
     private $security;
     private $serializer;
     private $recipeService;
-    private $logger;
 
-    public function __construct(EntityManagerInterface $entityManager, Security $security, SerializerInterface $serializer, RecipeService $recipeService, LoggerInterface $logger)
+    public function __construct(EntityManagerInterface $entityManager, Security $security, SerializerInterface $serializer, RecipeService $recipeService)
     {
         $this->entityManager = $entityManager;
         $this->security = $security;
         $this->serializer = $serializer;
         $this->recipeService = $recipeService;
-        $this->logger = $logger;
     }
 
     #[Route('', name: 'recipe_index', methods: ['GET'])]
@@ -50,10 +47,6 @@ class RecipeController extends AbstractController
     #[Route('/new', name: 'recipe_new', methods: ['POST'])]
     public function new(Request $request): JsonResponse
     {
-        $this->logger->info('Entering new recipe creation method');
-
-        $this->denyAccessUnlessGranted('ROLE_USER');
-
         $user = $this->getUser();
         $profile = $user->getProfile();
 
@@ -61,44 +54,23 @@ class RecipeController extends AbstractController
         $recipe->setProfile($profile);
 
         $form = $this->createForm(RecipeType::class, $recipe);
-        
-        $this->logger->debug('Request content: ' . $request->getContent());
-        
         $form->handleRequest($request);
 
-        if ($form->isSubmitted()) {
-            $this->logger->info('Form submitted');
-            if ($form->isValid()) {
-                $this->logger->info('Form is valid');
-                try {
-                    $this->entityManager->beginTransaction();
-                    $this->recipeService->handleImageUpload($recipe);
-                    $this->entityManager->persist($recipe);
-                    $this->entityManager->flush();
-                    $this->entityManager->commit();
+        if ($form->isSubmitted() && $form->isValid()) {
+            
+            $this->recipeService->handleImageUpload($recipe);
+            $this->entityManager->persist($recipe);
+            $this->entityManager->flush();
 
-                    $responseData = $this->serializer->serialize($recipe, 'json', ['groups' => 'recipe']);
-                    return new JsonResponse($responseData, JsonResponse::HTTP_CREATED, [], true);
-                } catch (\Exception $e) {
-                    $this->entityManager->rollback();
-                    $this->logger->error('Error creating recipe: ' . $e->getMessage());
-                    return new JsonResponse(['error' => 'An error occurred while creating the recipe'], JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
-                }
-            } else {
-                $this->logger->warning('Form is invalid');
-                $errors = $form->getErrors(true, false);
-                foreach ($errors as $error) {
-                    $this->logger->warning($error->getMessage());
-                }
-            }
-        } else {
-            $this->logger->warning('Form not submitted');
+            $responseData = $this->serializer->serialize($recipe, 'json', ['groups' => 'recipe']);
+
+            return new JsonResponse($responseData, JsonResponse::HTTP_CREATED, [], true);
         }
 
         $errors = (string) $form->getErrors(true, false);
-        $this->logger->error('Form errors: ' . $errors);
         return new JsonResponse(['error' => 'Invalid data', 'details' => $errors], JsonResponse::HTTP_BAD_REQUEST);
     }
+
     #[Route('/{id<\d+>}', name: 'recipe_show', methods: ['GET'])]
     public function show(Recipe $recipe): JsonResponse
     {
@@ -109,46 +81,13 @@ class RecipeController extends AbstractController
         return new JsonResponse($data, JsonResponse::HTTP_OK, [], true);
     }
 
-    #[Route('/{id<\d+>}/edit/view', name: 'recipe_edit_view', methods: ['GET'])]
-    public function editView(RecipeRepository $recipeRepository, $id): Response
+    #[Route('/{id<\d+>}/edit', name: 'recipe_edit', methods: ['PUT'])]
+    public function edit(Request $request, Recipe $recipe): JsonResponse
     {
-        $recipe = $recipeRepository->findRecipeWithDetails($id);
-
-        if (!$recipe) {
-            throw $this->createNotFoundException('Recipe not found');
-        }
-
-        $this->denyAccessUnlessGranted('edit', $recipe);
-
-        $user = $this->getUser();
-        $profile = $user->getProfile();
-
-        $form = $this->createForm(RecipeType::class, $recipe);
-
-        return $this->render('recipe/manage.html.twig', [
-            'form_new' => $form->createView(),
-            'form_edit' => $form->createView(),
-            'profile' => $profile,
-            'recipe' => $recipe,
-        ]);
-    }
-
-    #[Route('/{id<\d+>}/edit', name: 'recipe_edit', methods: ['PUT', 'PATCH'])]
-    public function edit(Request $request, RecipeRepository $recipeRepository, $id): JsonResponse
-    {
-        $recipe = $recipeRepository->findRecipeWithDetails($id);
-
-        if (!$recipe) {
-            return new JsonResponse(['error' => 'Recipe not found'], JsonResponse::HTTP_NOT_FOUND);
-        }
-
         $this->denyAccessUnlessGranted('edit', $recipe);
 
         $form = $this->createForm(RecipeType::class, $recipe);
         $form->handleRequest($request);
-
-        // Log the request data
-        $this->logger->info('Request data: ' . $request->getContent());
 
         if ($form->isSubmitted() && $form->isValid()) {
             $this->recipeService->handleImageUpload($recipe);
@@ -159,10 +98,7 @@ class RecipeController extends AbstractController
             return new JsonResponse($responseData, JsonResponse::HTTP_OK, [], true);
         }
 
-        // Log form errors
         $errors = (string) $form->getErrors(true, false);
-        $this->logger->error('Form errors: ' . $errors);
-
         return new JsonResponse(['error' => 'Invalid data', 'details' => $errors], JsonResponse::HTTP_BAD_REQUEST);
     }
 
@@ -193,12 +129,10 @@ class RecipeController extends AbstractController
         $user = $this->getUser();
         $profile = $user->getProfile();
 
-        $formNew = $this->createForm(RecipeType::class, new Recipe());
-        $formEdit = $this->createForm(RecipeType::class, new Recipe());
+        $form = $this->createForm(RecipeType::class, new Recipe());
 
         return $this->render('recipe/manage.html.twig', [
-            'form_new' => $formNew->createView(),
-            'form_edit' => $formEdit->createView(),
+            'form' => $form->createView(),
             'profile' => $profile,
         ]);
     }

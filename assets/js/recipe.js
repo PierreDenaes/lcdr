@@ -8,9 +8,7 @@ document.addEventListener('DOMContentLoaded', function() {
 function initializePage() {
     const recipesList = document.getElementById('recipes-list');
     const recipeFormNew = document.getElementById('recipe-form-new');
-    const recipeFormEdit = document.getElementById('recipe-form-edit');
     const notification = document.getElementById('notification');
-    const editRecipeTab = document.getElementById('edit-recipe-tab');
 
     // Gestion des ingrédients
     function handleAddIngredient(list) {
@@ -92,67 +90,6 @@ function initializePage() {
             });
     };
 
-    // Fonction pour éditer une recette
-    window.editRecipe = function(id) {
-        fetch(`/profile/recipes/${id}`)
-            .then(response => response.json())
-            .then(data => {
-                // Pré-remplir le formulaire d'édition
-                const actionUrl = `/profile/recipes/${id}/edit`;
-                recipeFormEdit.action = actionUrl;
-
-                // Remplir les champs du formulaire avec les données de la recette
-                document.querySelector('#recipe-form-edit [name="recipe[title]"]').value = data.title;
-                document.querySelector('#recipe-form-edit [name="recipe[description]"]').value = data.description;
-                document.querySelector('#recipe-form-edit [name="recipe[difficulty]"]').value = data.difficulty;
-                document.querySelector('#recipe-form-edit [name="recipe[cooking_time]"]').value = data.cooking_time;
-                document.querySelector('#recipe-form-edit [name="recipe[rest_time]"]').value = data.rest_time;
-
-                // Gérer l'image de la recette
-                if (data.imageName) {
-                    const imageContainer = document.querySelector('#recipe-form-edit #image-preview');
-                    imageContainer.innerHTML = `<img src="/images/recipes/${data.imageName}" class="img-fluid mt-2" alt="Image de la recette">`;
-                }
-
-                // Gérer les ingrédients
-                const ingredientList = document.querySelector('#recipe-form-edit #ingredient-list');
-                ingredientList.innerHTML = '';
-                data.ingredients.forEach((ingredient, index) => {
-                    const newLi = document.createElement('li');
-                    newLi.classList.add('list-group-item');
-                    newLi.innerHTML = `
-                        <div class="mb-3">
-                            <input type="text" class="form-control" name="recipe[ingredients][${index}][name]" value="${ingredient.name}" placeholder="Nom de l'ingrédient">
-                            <input type="text" class="form-control mt-1" name="recipe[ingredients][${index}][quantity]" value="${ingredient.quantity}" placeholder="Quantité">
-                            <button type="button" class="remove-ingredient btn btn-danger mt-1">Supprimer</button>
-                        </div>
-                    `;
-                    ingredientList.appendChild(newLi);
-                });
-
-                // Gérer les étapes
-                const etapeRecettesList = document.querySelector('#recipe-form-edit #etapeRecettes-list');
-                etapeRecettesList.innerHTML = '';
-                data.steps.forEach((step, index) => {
-                    const newLi = document.createElement('li');
-                    newLi.classList.add('list-group-item', 'mb-3');
-                    newLi.innerHTML = `
-                        <textarea class="form-control" name="recipe[steps][${index}][description]" rows="3">${step.description}</textarea>
-                        <button type="button" class="remove-etapeRecette btn btn-danger mt-1">Supprimer</button>
-                    `;
-                    etapeRecettesList.appendChild(newLi);
-                });
-
-                // Activer l'onglet d'édition
-                editRecipeTab.style.display = 'block';
-                const tabTrigger = new Tab(document.querySelector('.nav-link[href="#edit-recipe"]'));
-                tabTrigger.show();
-
-                handleAddIngredient(ingredientList);
-                handleAddStep(etapeRecettesList);
-            });
-    };
-
     // Gestionnaire pour les boutons de suppression
     function attachDeleteHandlers() {
         const deleteButtons = document.querySelectorAll('.btn-danger[data-id]');
@@ -213,25 +150,14 @@ function initializePage() {
         });
     });
 
-    // Soumission du formulaire d'édition de recette
-    recipeFormEdit.addEventListener('submit', function(event) {
-        event.preventDefault();
-        const formData = new FormData(recipeFormEdit);
-        const url = recipeFormEdit.action;
+    // Initialisation des listes d'ingrédients et d'étapes pour le formulaire de création
+    const ingredientListNew = document.getElementById('ingredient-list');
+    if (ingredientListNew) {
+        handleAddIngredient(ingredientListNew);
+    }
 
-        fetch(url, {
-            method: 'PUT',
-            body: formData,
-        }).then(response => {
-            if (response.ok) {
-                recipeFormEdit.reset();
-                showNotification('Recette mise à jour avec succès!');
-                const tabTrigger = new Tab(document.querySelector('.nav-link[href="#recipes"]'));
-                tabTrigger.show();
-                loadRecipes();
-                } else {
-                alert('Erreur lors de la mise à jour de la recette.');
-                }
-                });
-                });
-                }
+    const etapeRecettesListNew = document.getElementById('etapeRecettes-list');
+    if (etapeRecettesListNew) {
+        handleAddStep(etapeRecettesListNew);
+    }
+}
