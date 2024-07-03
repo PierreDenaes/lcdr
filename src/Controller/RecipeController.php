@@ -57,17 +57,19 @@ class RecipeController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            
             $this->recipeService->handleImageUpload($recipe);
             $this->entityManager->persist($recipe);
             $this->entityManager->flush();
 
             $responseData = $this->serializer->serialize($recipe, 'json', ['groups' => 'recipe']);
-
             return new JsonResponse($responseData, JsonResponse::HTTP_CREATED, [], true);
         }
 
-        $errors = (string) $form->getErrors(true, false);
+        $errors = [];
+        foreach ($form->getErrors(true) as $error) {
+            $errors[] = $error->getMessage();
+        }
+
         return new JsonResponse(['error' => 'Invalid data', 'details' => $errors], JsonResponse::HTTP_BAD_REQUEST);
     }
 
