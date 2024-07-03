@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 #[Route('/profile/recipes')]
@@ -32,6 +33,7 @@ class RecipeController extends AbstractController
     }
 
     #[Route('', name: 'recipe_index', methods: ['GET'])]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function index(RecipeRepository $recipeRepository): JsonResponse
     {
         $user = $this->getUser();
@@ -45,6 +47,7 @@ class RecipeController extends AbstractController
     }
 
     #[Route('/new', name: 'recipe_new', methods: ['POST'])]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function new(Request $request): JsonResponse
     {
         $user = $this->getUser();
@@ -146,6 +149,7 @@ class RecipeController extends AbstractController
     }
 
     #[Route('/manage', name: 'recipe_manage', methods: ['GET'])]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function manage(): Response
     {
         $user = $this->getUser();
