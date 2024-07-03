@@ -83,12 +83,15 @@ class RecipeController extends AbstractController
         return new JsonResponse($data, JsonResponse::HTTP_OK, [], true);
     }
 
-    #[Route('/{id<\d+>}/edit', name: 'recipe_edit', methods: ['PUT'])]
+    #[Route('/{id<\d+>}/edit', name: 'recipe_edit', methods: ['POST', 'PUT'])]
     public function edit(Request $request, Recipe $recipe): JsonResponse
     {
         $this->denyAccessUnlessGranted('edit', $recipe);
 
-        $form = $this->createForm(RecipeType::class, $recipe);
+        $form = $this->createForm(RecipeType::class, $recipe, [
+            'method' => 'POST',
+            'attr' => ['enctype' => 'multipart/form-data']
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -101,9 +104,26 @@ class RecipeController extends AbstractController
         }
 
         $errors = (string) $form->getErrors(true, false);
+        file_put_contents('php://stderr', print_r($errors, true));
+
         return new JsonResponse(['error' => 'Invalid data', 'details' => $errors], JsonResponse::HTTP_BAD_REQUEST);
     }
 
+    #[Route('/{id<\d+>}/edit-form', name: 'recipe_edit_form', methods: ['GET'])]
+    public function editForm(Recipe $recipe): Response
+    {
+        $this->denyAccessUnlessGranted('edit', $recipe);
+  
+
+        $form = $this->createForm(RecipeType::class, $recipe);
+
+        return $this->render('recipe/edit.html.twig', [
+            'form' => $form->createView(),
+            'recipe' => $recipe,
+            
+        ]);
+    }
+    
     #[Route('/{id<\d+>}', name: 'recipe_delete', methods: ['DELETE'])]
     public function delete(Request $request, Recipe $recipe): JsonResponse
     {
