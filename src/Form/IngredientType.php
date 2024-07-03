@@ -2,11 +2,11 @@
 
 namespace App\Form;
 
+use App\Entity\Unit;
 use App\Entity\Ingredient;
-use App\Entity\Recipe;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class IngredientType extends AbstractType
@@ -16,7 +16,12 @@ class IngredientType extends AbstractType
         $builder
             ->add('name')
             ->add('quantity')
-            
+            ->add('unit', EntityType::class, [
+                'class' => Unit::class,
+                'choice_label' => 'name',
+                'placeholder' => 'Select a unit',
+                'required' => true,
+            ])
         ;
     }
 

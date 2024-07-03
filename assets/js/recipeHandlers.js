@@ -1,6 +1,8 @@
+// recipeHandlers.js
 import { showNotification } from './notificationHandlers';
-import { Modal } from 'bootstrap';
-import { Tab } from 'bootstrap';
+import { Modal, Tab } from 'bootstrap';
+import { handleAddIngredient, handleAddStep } from './formHandlers'; // Importer les fonctions nécessaires
+
 export function loadRecipes(recipesList, attachDeleteHandlers) {
     fetch('/profile/recipes')
         .then(response => response.json())
@@ -87,11 +89,21 @@ function initializeEditForm() {
                 console.error('Error updating recipe:', error);
             });
         });
+
+        // Initialiser les gestionnaires pour ajouter/supprimer des ingrédients et des étapes
+        const ingredientListEdit = document.querySelector('.ingredient-list');
+        if (ingredientListEdit) {
+            handleAddIngredient(ingredientListEdit);
+        }
+
+        const stepListEdit = document.querySelector('.step-list');
+        if (stepListEdit) {
+            handleAddStep(stepListEdit);
+        }
     } else {
         console.error('Element with ID "recipe-form-edit" not found.');
     }
 }
-
 
 export function attachDeleteHandlers() {
     const deleteButtons = document.querySelectorAll('.btn-danger[data-id]');

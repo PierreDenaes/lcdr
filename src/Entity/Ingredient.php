@@ -27,6 +27,9 @@ class Ingredient
     
     private ?Recipe $recipe = null;
 
+    #[ORM\ManyToOne]
+    private ?Unit $unit = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -64,6 +67,18 @@ class Ingredient
     public function setRecipe(?Recipe $recipe): static
     {
         $this->recipe = $recipe;
+
+        return $this;
+    }
+
+    public function getUnit(): ?Unit
+    {
+        return $this->unit;
+    }
+
+    public function setUnit(?Unit $unit): static
+    {
+        $this->unit = $unit;
 
         return $this;
     }

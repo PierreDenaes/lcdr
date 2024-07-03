@@ -1,3 +1,4 @@
+// initializePage.js
 import { handleAddIngredient, handleAddStep } from './formHandlers';
 import { loadRecipes, viewRecipe, attachDeleteHandlers, editRecipe } from './recipeHandlers';
 import { showNotification } from './notificationHandlers';
@@ -34,13 +35,13 @@ export function initializePage() {
         });
     });
 
-    const ingredientListNew = document.getElementById('ingredient-list');
-    if (ingredientListNew) {
-        handleAddIngredient(ingredientListNew);
-    }
+    const ingredientLists = document.querySelectorAll('.ingredient-list');
+    ingredientLists.forEach(list => {
+        handleAddIngredient(list);
+    });
 
-    const etapeRecettesListNew = document.getElementById('etapeRecettes-list');
-    if (etapeRecettesListNew) {
-        handleAddStep(etapeRecettesListNew);
-    }
+    const stepLists = document.querySelectorAll('.step-list');
+    stepLists.forEach(list => {
+        handleAddStep(list);
+    });
 }
